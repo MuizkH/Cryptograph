@@ -94,6 +94,8 @@ export const StaggerItem: React.FC<StaggerItemProps> = ({
           }
         }
       }}
+      initial="hidden"
+      animate="show"
       className={className}
     >
       {children}

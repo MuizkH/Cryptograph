@@ -19,9 +19,10 @@ import { ScrollReveal } from './ScrollReveal';
 
 interface TransactionsProps {
   transactions: Transaction[];
+  onAddTransactionClick?: () => void;
 }
 
-export default function Transactions({ transactions }: TransactionsProps) {
+export default function Transactions({ transactions, onAddTransactionClick }: TransactionsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('All');
   const [currentPage, setCurrentPage] = useState(1);
@@ -85,14 +86,26 @@ export default function Transactions({ transactions }: TransactionsProps) {
           </p>
         </div>
 
-        <button
-          onClick={handleDownloadStatement}
-          id="transactions-download-statement-btn"
-          className="bg-[#C5A880] hover:bg-[#b5956a] text-black text-xs font-bold py-3 px-5 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer uppercase tracking-[0.14em] shadow-lg border border-white/10"
-        >
-          <Download className="w-4 h-4 text-black" />
-          <span>Download Statement</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {onAddTransactionClick && (
+            <button
+              onClick={onAddTransactionClick}
+              id="transactions-add-tx-btn"
+              className="bg-white/10 hover:bg-white/15 text-white text-xs font-bold py-3 px-5 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer uppercase tracking-[0.14em] shadow-lg border border-white/10"
+            >
+              <span>+ Add Transaction</span>
+            </button>
+          )}
+
+          <button
+            onClick={handleDownloadStatement}
+            id="transactions-download-statement-btn"
+            className="bg-[#C5A880] hover:bg-[#b5956a] text-black text-xs font-bold py-3 px-5 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer uppercase tracking-[0.14em] shadow-lg border border-white/10"
+          >
+            <Download className="w-4 h-4 text-black" />
+            <span>Download Statement</span>
+          </button>
+        </div>
       </div>
 
       {/* Row: Search Bar & Filter Pills */}

@@ -4,7 +4,8 @@ import {
   CheckCircle2, 
   XSquare,
   Sparkles,
-  Link2
+  Link2,
+  ChevronDown
 } from 'lucide-react';
 import { RWAAsset, BankNode } from '../types';
 import { getInstitutionName } from '../services/blockchain_mock';
@@ -23,6 +24,7 @@ export default function BridgeTransfer({ assets, banks, onExecuteTransfer }: Bri
   const [transferAmount, setTransferAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastResult, setLastResult] = useState<{ success: boolean; message: string; to: string } | null>(null);
+  const [isAssetDropdownOpen, setIsAssetDropdownOpen] = useState(false);
 
   // Filter verified nodes for quick selector options inside input
   const testComplianceDestinations = banks.filter(b => b.verified);
@@ -54,8 +56,8 @@ export default function BridgeTransfer({ assets, banks, onExecuteTransfer }: Bri
     const selectedAsset = assets.find(a => a.id === selectedAssetId);
     if (!selectedAsset) return;
 
-    if (selectedAsset.spent < amt) {
-      toast.error(`Insufficient budget allocated in "${selectedAsset.name}". Max transferable: $${selectedAsset.spent}`);
+    if (selectedAsset.limit < amt) {
+      toast.error(`Transfer amount exceeds maximum budget limit in "${selectedAsset.name}". Max transferable: $${selectedAsset.limit.toLocaleString()}`);
       return;
     }
 
@@ -112,26 +114,71 @@ export default function BridgeTransfer({ assets, banks, onExecuteTransfer }: Bri
 
             <form onSubmit={handleTransferSubmit} className="space-y-5">
               {/* Asset NFT Selector */}
-              <div>
+              <div className="relative">
                 <label className="block text-[10px] font-extrabold text-[#C5A880] uppercase tracking-[0.2em] mb-2">
                   Select Tokenized Asset Allocation
                 </label>
-                <select
-                  id="bridge-asset-selector"
-                  value={selectedAssetId}
-                  onChange={(e) => {
-                    setSelectedAssetId(e.target.value);
-                    setLastResult(null);
-                  }}
-                  className="w-full bg-white/5 border border-white/10 focus:border-[#C5A880] focus:outline-none rounded-lg py-3 px-4 text-sm text-white cursor-pointer"
+                <button
+                  type="button"
+                  id="bridge-asset-selector-btn"
+                  onClick={() => setIsAssetDropdownOpen(!isAssetDropdownOpen)}
+                  className="w-full text-left bg-white/5 border border-white/10 hover:bg-white/10 focus:border-[#C5A880] focus:outline-none rounded-lg py-3 px-4 text-sm text-white cursor-pointer flex items-center justify-between"
                 >
-                  <option value="" className="bg-[#121214] text-slate-400">Select portfolio allocation asset...</option>
-                  {assets.map((asset) => (
-                    <option key={asset.id} value={asset.id} className="bg-[#121214] text-white">
-                      {asset.name} (Value: ${asset.spent.toLocaleString()} / Limit: ${asset.limit.toLocaleString()})
-                    </option>
-                  ))}
-                </select>
+                  {assets.find(a => a.id === selectedAssetId) ? (
+                    <span>
+                      {assets.find(a => a.id === selectedAssetId)?.name} <span className="text-[10px] text-[#C5A880] font-bold font-mono ml-2">(Val: ${assets.find(a => a.id === selectedAssetId)?.spent.toLocaleString()} / Lim: ${assets.find(a => a.id === selectedAssetId)?.limit.toLocaleString()})</span>
+                    </span>
+                  ) : (
+                    <span className="text-slate-400">Select portfolio allocation asset...</span>
+                  )}
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isAssetDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isAssetDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsAssetDropdownOpen(false)} 
+                    />
+                    <div className="absolute left-0 right-0 mt-2 bg-[#141416]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl z-50 py-1.5 animate-fade-in origin-top">
+                      {assets.length === 0 ? (
+                        <div className="px-4 py-3 text-xs text-slate-400">
+                          No active budget allocation assets found.
+                        </div>
+                      ) : (
+                        assets.map((asset) => {
+                          const isSelected = asset.id === selectedAssetId;
+                          return (
+                            <button
+                              key={asset.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedAssetId(asset.id);
+                                setLastResult(null);
+                                setIsAssetDropdownOpen(false);
+                              }}
+                              className={`w-full text-left px-4 py-2.5 text-xs flex items-center justify-between transition-all cursor-pointer ${
+                                isSelected 
+                                  ? 'bg-[#C5A880]/15 text-[#C5A880] font-bold' 
+                                  : 'text-white hover:bg-white/5 hover:text-[#C5A880]'
+                              }`}
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-semibold">{asset.name}</span>
+                                <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+                                  Current Value: ${asset.spent.toLocaleString()} | Allocation Limit: ${asset.limit.toLocaleString()}
+                                </span>
+                              </div>
+                              {isSelected && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#C5A880]" />
+                              )}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Transferrable Value */}

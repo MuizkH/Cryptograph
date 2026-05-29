@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Sparkles, PlusCircle } from 'lucide-react';
+import { X, Sparkles, PlusCircle, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface AddTransactionModalProps {
@@ -13,6 +13,9 @@ export default function AddTransactionModal({ onClose, onAddTransaction }: AddTr
   const [status, setStatus] = useState<'Completed' | 'Pending' | 'Failed'>('Completed');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<'debit' | 'credit'>('debit');
+
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,25 +118,53 @@ export default function AddTransactionModal({ onClose, onAddTransaction }: AddTr
           </div>
 
           {/* Category */}
-          <div>
+          <div className="relative">
             <label className="block text-[10px] font-extrabold text-[#C5A880] uppercase tracking-[0.2em] mb-2">
               Allocation Category
             </label>
-            <select
-              id="modal-category-select"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as any)}
-              className="w-full bg-white/5 border border-white/10 focus:border-[#C5A880] focus:outline-none rounded-lg py-2.5 px-3 text-xs text-white cursor-pointer"
+            <button
+              type="button"
+              id="modal-category-select-btn"
+              onClick={() => {
+                setIsCategoryDropdownOpen(!isCategoryDropdownOpen);
+                setIsStatusDropdownOpen(false);
+              }}
+              className="w-full text-left bg-white/5 border border-white/10 hover:bg-white/10 focus:border-[#C5A880] focus:outline-none rounded-lg py-2.5 px-3 text-xs text-white cursor-pointer flex items-center justify-between"
             >
-              <option value="Groceries" className="bg-[#121214] text-white">Groceries</option>
-              <option value="Investment" className="bg-[#121214] text-white">Investment</option>
-              <option value="Rent" className="bg-[#121214] text-white">Rent</option>
-              <option value="Dining" className="bg-[#121214] text-white">Dining</option>
-              <option value="Health & Fitness" className="bg-[#121214] text-white">Health & Fitness</option>
-              <option value="Income" className="bg-[#121214] text-white">Income</option>
-              <option value="Travel" className="bg-[#121214] text-white">Travel</option>
-              <option value="Other" className="bg-[#121214] text-white">Other</option>
-            </select>
+              <span>{category}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isCategoryDropdownOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setIsCategoryDropdownOpen(false)} 
+                />
+                <div className="absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-[#141416] border border-white/10 rounded-lg shadow-2xl z-50 py-1 animate-fade-in origin-top">
+                  {(['Groceries', 'Investment', 'Rent', 'Dining', 'Health & Fitness', 'Income', 'Travel', 'Other'] as const).map((cat) => {
+                    const isSelected = category === cat;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          setCategory(cat);
+                          setIsCategoryDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-all cursor-pointer ${
+                          isSelected 
+                            ? 'bg-[#C5A880]/15 text-[#C5A880] font-bold' 
+                            : 'text-white hover:bg-white/5 hover:text-[#C5A880]'
+                        }`}
+                      >
+                        <span>{cat}</span>
+                        {isSelected && <span className="w-1 h-1 rounded-full bg-[#C5A880]" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Amount */}
@@ -155,20 +186,53 @@ export default function AddTransactionModal({ onClose, onAddTransaction }: AddTr
           </div>
 
           {/* Status */}
-          <div>
+          <div className="relative">
             <label className="block text-[10px] font-extrabold text-[#C5A880] uppercase tracking-[0.2em] mb-2">
               Completion Status Flow
             </label>
-            <select
-              id="modal-status-select"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
-              className="w-full bg-white/5 border border-white/10 focus:border-[#C5A880] focus:outline-none rounded-lg py-2.5 px-3 text-xs text-white cursor-pointer"
+            <button
+              type="button"
+              id="modal-status-select-btn"
+              onClick={() => {
+                setIsStatusDropdownOpen(!isStatusDropdownOpen);
+                setIsCategoryDropdownOpen(false);
+              }}
+              className="w-full text-left bg-white/5 border border-white/10 hover:bg-white/10 focus:border-[#C5A880] focus:outline-none rounded-lg py-2.5 px-3 text-xs text-white cursor-pointer flex items-center justify-between"
             >
-              <option value="Completed" className="bg-[#121214] text-white">Completed</option>
-              <option value="Pending" className="bg-[#121214] text-white">Pending</option>
-              <option value="Failed" className="bg-[#121214] text-white">Failed</option>
-            </select>
+              <span>{status}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isStatusDropdownOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setIsStatusDropdownOpen(false)} 
+                />
+                <div className="absolute left-0 right-0 mt-1 bg-[#141416] border border-white/10 rounded-lg shadow-2xl z-50 py-1 animate-fade-in origin-top">
+                  {(['Completed', 'Pending', 'Failed'] as const).map((st) => {
+                    const isSelected = status === st;
+                    return (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => {
+                          setStatus(st);
+                          setIsStatusDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-all cursor-pointer ${
+                          isSelected 
+                            ? 'bg-[#C5A880]/15 text-[#C5A880] font-bold' 
+                            : 'text-white hover:bg-white/5 hover:text-[#C5A880]'
+                        }`}
+                      >
+                        <span>{st}</span>
+                        {isSelected && <span className="w-1 h-1 rounded-full bg-[#C5A880]" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Submit Action */}

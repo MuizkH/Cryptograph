@@ -7,7 +7,6 @@ import Transactions from './components/Transactions';
 import BridgeTransfer from './components/BridgeTransfer';
 import ComplianceRegistry from './components/ComplianceRegistry';
 import AddTransactionModal from './components/AddTransactionModal';
-import CinematicBackground from './components/CinematicBackground';
 
 import { Transaction, RWAAsset, BankNode } from './types';
 import { INITIAL_BANKS, INITIAL_TRANSACTIONS, INITIAL_ASSETS } from './utils/data';
@@ -41,19 +40,57 @@ export default function App() {
   };
 
   // Add customized Digital Allocation (Asset)
-  const handleAddAsset = (name: string, limit: number, timePeriod: 'Monthly' | 'Quarterly' | 'Yearly') => {
+  const handleAddAsset = (
+    name: string, 
+    limit: number, 
+    timePeriod: 'Monthly' | 'Quarterly' | 'Yearly', 
+    spent: number = 0
+  ) => {
+    const percent = limit > 0 ? (spent / limit) * 100 : 0;
+    let statusLabel: 'On Track' | 'Healthy' | 'Untouched' | 'Over Limit' = 'Healthy';
+    if (percent >= 100) statusLabel = 'Over Limit';
+    else if (percent >= 75) statusLabel = 'On Track';
+    else if (percent > 0) statusLabel = 'Healthy';
+    else statusLabel = 'Untouched';
+
     const newAsset: RWAAsset = {
       id: `rwa-custom-${Date.now()}`,
       name,
       timePeriod,
-      spent: 0,
+      spent,
       limit,
       country: activeBank.location,
-      status: 'Untouched',
+      status: statusLabel,
       ownerAddress: activeBank.address
     };
 
     setAssets((prev) => [newAsset, ...prev]);
+  };
+
+  // Update existing Digital Allocation
+  const handleUpdateAsset = (id: string, updatedFields: Partial<RWAAsset>) => {
+    setAssets((prev) => prev.map((asset) => {
+      if (asset.id === id) {
+        const merged = { ...asset, ...updatedFields };
+        const percent = merged.limit > 0 ? (merged.spent / merged.limit) * 100 : 0;
+        let statusLabel: 'On Track' | 'Healthy' | 'Untouched' | 'Over Limit' = 'Healthy';
+        if (percent >= 100) statusLabel = 'Over Limit';
+        else if (percent >= 75) statusLabel = 'On Track';
+        else if (percent > 0) statusLabel = 'Healthy';
+        else statusLabel = 'Untouched';
+        
+        return {
+          ...merged,
+          status: statusLabel
+        };
+      }
+      return asset;
+    }));
+  };
+
+  // Delete Digital Allocation
+  const handleDeleteAsset = (id: string) => {
+    setAssets((prev) => prev.filter((asset) => asset.id !== id));
   };
 
   // Add dynamic manual transaction ledger insertion
@@ -212,12 +249,15 @@ export default function App() {
           <Budgets 
             assets={assets}
             onAddAsset={handleAddAsset}
+            onUpdateAsset={handleUpdateAsset}
+            onDeleteAsset={handleDeleteAsset}
           />
         );
       case 'transactions':
         return (
           <Transactions 
             transactions={transactions}
+            onAddTransactionClick={() => setIsAddTxOpen(true)}
           />
         );
       case 'bridge':
@@ -249,7 +289,6 @@ export default function App() {
     <div className="min-h-screen font-sans antialiased text-white flex relative overflow-x-hidden">
 
       {/* Premium Cinematic VisionOS Background Overlay */}
-      <CinematicBackground />
       {/* Toast Alert Config with Editorial Aesthetics */}
       <Toaster 
         position="top-right" 
@@ -289,6 +328,9 @@ export default function App() {
           onAddTransaction={handleAddTransaction}
         />
       )}
+      <div className="fixed bottom-4 right-4 z-50 text-xs text-white/60 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-3 py-2 shadow-lg">
+        Cryptograph v1.0 • Institutional RWA Platform
+      </div>
     </div>
   );
 }

@@ -328,6 +328,9 @@ export default function App() {
           onAddTransaction={handleAddTransaction}
         />
       )}
+      <div className="fixed bottom-4 right-4 z-50 text-xs text-white/60 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-3 py-2 shadow-lg">
+        Cryptograph v1.0 • Institutional RWA Platform
+      </div>
     </div>
   );
 }

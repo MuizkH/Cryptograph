@@ -7,7 +7,7 @@ import Transactions from './components/Transactions';
 import BridgeTransfer from './components/BridgeTransfer';
 import ComplianceRegistry from './components/ComplianceRegistry';
 import AddTransactionModal from './components/AddTransactionModal';
-
+import Footer from './components/Footer';
 import { Transaction, RWAAsset, BankNode } from './types';
 import { INITIAL_BANKS, INITIAL_TRANSACTIONS, INITIAL_ASSETS } from './utils/data';
 import { getInstitutionName } from './services/blockchain_mock';
@@ -288,6 +288,7 @@ export default function App() {
   return (
     <div className="min-h-screen font-sans antialiased text-white flex relative overflow-x-hidden">
 
+
       {/* Premium Cinematic VisionOS Background Overlay */}
       {/* Toast Alert Config with Editorial Aesthetics */}
       <Toaster 
@@ -331,6 +332,7 @@ export default function App() {
       <div className="fixed bottom-4 right-4 z-50 text-xs text-white/60 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-3 py-2 shadow-lg">
         Cryptograph v1.0 • Institutional RWA Platform
       </div>
+      <Footer />
     </div>
   );
 }

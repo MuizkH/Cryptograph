@@ -14,7 +14,7 @@ import { getInstitutionName } from './services/blockchain_mock';
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<string>('overview');
-  
+  console.log("Cryptograph application initialized");
   // Ledger Databases States
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [assets, setAssets] = useState<RWAAsset[]>(INITIAL_ASSETS);
